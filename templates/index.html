@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+       .btn{
+           background-color: #5cb85c;
+           display:inline-block;
+           height: 30px;
+           width:80px;
+       }
+
+    </style>
+</head>
+<body>
+
+    <h1>ajax1</h1>
+    <hr>
+    <div>
+        <a class="btn" onclick="ajax_submit1()">ajax1提交</a>
+        <a class="btn" onclick="ajax_submit2()">ajax2提交</a>
+        <a class="btn" onclick="ajax_submit4()">ajax4提交</a>
+        <a class="btn" onclick="ajax_submit5()">ajax5提交</a>
+    </div>
+    <hr>
+    <h2>iframe_get</h2>
+    <div>
+        <iframe style="display: none" id="ifra" name="ifra" ></iframe>
+        <form id="fm" action="/ajax2.html" method="POST" target="ifra">
+            <input name="root" type="text" value="1234">
+            <a id="btn" class="btn" href="#" onclick="ajax_submit3()">ajax3提交</a>
+        </form>
+    </div>
+
+    <h3>POST方法</h3>
+    <div>
+        <iframe style="display: none" id="ifra1" name="ifra1"></iframe>
+        <form action="/ajax2.html" id="fm1" target="ifra1" method="POST">
+            <input type="text" name="root" value="5678">
+            <a href="#" class="btn" onclick="ajax_submit6()">ajax6提交</a>
+        </form>
+    </div>
+
+    <hr>
+    <h3>文件上传</h3>
+    <div>
+        <input type="file" id="img">
+        <a class="btn" onclick="ajax_submit7()">ajax7提交</a>
+        <a class="btn" onclick="ajax_submit8()">ajax8提交</a>
+    </div>
+    <div>
+        <iframe style="display: none" id="ifra3" name="ifra3"></iframe>
+        <form id="fm3" action="/ajax3.html" method="POST" target="ifra3" enctype="multipart/form-data">
+            <input type="text" name="k1">
+            <input type="text" name="k2">
+            <input type="file" name="k3">
+            <a href="#" class="btn" onclick="ajax_submit9()">ajax9提交</a>
+        </form>
+    </div>
+
+    <script src="/static/js/jquery-3.1.1.js"></script>
+    <script>
+        function ajax_submit1() {
+            $.ajax({
+                url:"/ajax1.html",
+                type:"GET",
+                success:function (arg) {
+                    console.log(arg)
+                }
+
+            })
+        }   //ajax get请求
+
+        function ajax_submit2() {
+            var xhr= new XMLHttpRequest();
+            xhr.onreadystatechange=function () {
+                if(xhr.readyState==4){
+                    console.log(xhr.responseText);
+                }
+            };
+            xhr.open("GET","/ajax2.html?root=123");
+            xhr.send(null)
+        }   //xhr get请求
+        
+        function ajax_submit3() {
+            document.getElementById("ifra").onload=iframe_submit;
+            document.getElementById("fm").submit();
+        }   // iframe 请求
+        function iframe_submit() {
+            var text = this.contentWindow.document.body.innerHTML;
+            console.log(text)
+        }
+
+        function ajax_submit4() {
+            $.ajax({
+                url:"/ajax2.html",
+                type:"POST",
+                data:{"p":123},
+                success:function (arg) {
+                    console.log(arg)
+                }
+            })
+        }   // ajax post请求
+        function ajax_submit5() {
+            var xhr= new XMLHttpRequest();
+            xhr.onreadystatechange=function () {
+                if(xhr.readyState == 4){
+                    var text =xhr.responseText
+                    console.log(text)
+                }
+            };
+            xhr.open("POST","/ajax2.html");
+            xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset-UTF-8")
+            xhr.send("root=456")
+        }   //xhr post请求
+
+        function ajax_submit6() {
+            document.getElementById("ifra1").onload=reloadIframe;
+            document.getElementById("fm1").submit()
+        }  //iframe post
+        function reloadIframe() {
+            var text=this.contentWindow.document.body.innerHTML;
+                console.log(text)   //字符串
+                content = JSON.parse(text);
+                console.log(content) //对象
+                    alert(content.k)
+        }
+
+        function ajax_submit7() {
+            var data = new FormData();
+            var img_obj1 = $("#img").prop("files")[0];
+            console.log(img_obj1)
+{#            var img_obj2 = document.getElementById("img").files[0];#}
+{#            console.log(img_obj2);#}
+            data.append("k1","v1");
+            data.append("k2","v2");
+            data.append("k3",img_obj1);
+            $.ajax({
+                url:"/ajax3.html",
+                type:"POST",
+                data: data,
+                success:function (arg) {
+                    console.log(arg)
+                },
+                processData: false,
+                contentType: false
+            })
+        }   // ajax 传输文件
+
+        function ajax_submit8() {
+            var data = new FormData();
+            data.append("k1","v1");
+            data.append("k2","v2");
+{#            data.append("k3",document.getElementById("img").files[0])#}
+
+{#            var img_obj1 = $("#img").prop("files")[0];#}
+{#                console.log(img_obj1)#}
+{#            var img_obj2 = document.getElementById("img").files[0];#}
+{#                console.log(img_obj2);#}
+
+            data.append("k3",$("#img").prop("files")[0]);
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if(xhr.readyState==4){
+                   var content = xhr.responseText;
+                    console.log(content)
+                }
+            };
+            xhr.open("POST","/ajax3.html");
+            xhr.send(data)
+        }   // xhr 传文件
+
+
+        function ajax_submit9() {
+            document.getElementById("ifra3").onload=reloadIframe3;
+            document.getElementById("fm3").submit()
+        }   //iframe 传文件
+        function reloadIframe3() {
+            var text=this.contentWindow.document.body.innerHTML;
+                console.log(text)   //字符串
+                content = JSON.parse(text);
+                console.log(content) //对象
+                    alert(content.k)
+        }
+
+    </script>
+</body>
+</html>
